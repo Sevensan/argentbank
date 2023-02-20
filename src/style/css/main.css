@@ -186,11 +186,19 @@ html {
     margin-left: 0.25rem;
   }
 
+  #formUserPage{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
   .input-wrapper {
     display: flex;
     flex-direction: column;
     text-align: left;
     margin-bottom: 1rem;
+    max-width: 200px;
   }
 
   .input-wrapper label {

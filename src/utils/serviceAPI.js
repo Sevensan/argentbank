@@ -16,5 +16,5 @@ export const postProfile = (token) => {
 export const putProfile = (body,token) => {
   console.log("body : ", body)
   console.log("token : ", token)
-  return axios.put('http://localhost:3001/api/v1/user/profile', {body}, {headers : token})
+  return axios.put('http://localhost:3001/api/v1/user/profile', body, {headers : token})
 }

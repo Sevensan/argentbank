@@ -1,17 +1,20 @@
 import { useState } from 'react'
-import { postLogin } from '../utils/serviceAPI'
-import { useDispatch, useSelector } from 'react-redux'
+import { postLogin, postProfile } from '../utils/serviceAPI'
+import { useDispatch } from 'react-redux'
 import { logUser } from '../utils/store'
 import { useNavigate } from 'react-router-dom'
 
 function Form() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const token = useSelector((state) => state.token)
   const user = {}
   const [password, setPassword] = useState('')
   const [userName, setUserName] = useState('')
   const [remember, setRemember] = useState(false)
+  const request = (token) => {
+	return {Authorization: `Bearer ${token}`}
+ }
+
   const login = (e) => {
     e.preventDefault()
 	user.email = userName
@@ -19,17 +22,19 @@ function Form() {
 	user.remember = remember
     postLogin(user)
     .then((response) => {
-		console.log("--- REPONSE : ", response)
       if(response.status === 200) {
-		  user.token = response.data.body.token
-		  console.log("--- USER : ", user)
+		user.token = response.data.body.token
+		postProfile(request(user.token)).then((res) => {
+		  user.firstName = res.data.body.firstName
+		  user.lastName = res.data.body.lastName
 		  dispatch(logUser(user))
-		  navigate("/user")
+		  navigate("/profile")
+		})
 	  }
 	})
-		.catch((response) => {
-          console.error(response)
-		})
+	.catch((response) => {
+      console.error(response)
+	})
 	}
 
 	return (
@@ -48,7 +53,7 @@ function Form() {
 					<label htmlFor="remember-me">Remember me</label>
 				</div>
 				<button className="sign-in-button">Sign In</button>
-				{token === '' && <span>erreur ici</span>}
+				{user.token === '' && <span>erreur ici</span>}
 			</form>
 		</div>
 	)

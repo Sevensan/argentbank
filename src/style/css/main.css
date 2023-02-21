@@ -297,3 +297,34 @@ html {
       width: 200px;
     }
   }
+
+  /* page 404 */
+  .page404{
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: red;
+  }
+  .page404 h1{
+    font-size: 3rem;
+  }
+
+  /* NAV AJOUT */
+  .nav-userName svg,
+  .nav-sign-btn svg{
+    margin-right: 10px;
+  }
+  .nav-sign-btn{
+    margin-left: 20px;
+  }
+
+  /* userPage form edit profile */
+  .flex-row{
+    display: flex;
+    flex-direction: row !important;
+  }
+  .flex-row button{
+    margin: 0 10px;
+  }

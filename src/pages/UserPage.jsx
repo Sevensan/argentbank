@@ -3,47 +3,36 @@ import AccountList from "../components/AccountList"
 
 import { useSelector } from "react-redux"
 
-import { putProfile, postProfile } from "../utils/serviceAPI"
+import { putProfile } from "../utils/serviceAPI"
 
 import { useState } from "react"
 import { Navigate } from "react-router-dom"
 
-function UserPage() {
+import { useDispatch } from "react-redux"
+import { editProfile } from "../utils/store"
 
+function UserPage() {
+  const dispatch = useDispatch()
   const [newFirstName, setFirstName] = useState('')
   const [newLastName, setLastName] = useState('')
   const userToken = useSelector((state) => state.token)
   const request = { Authorization: `Bearer ${userToken}` }
-  const [firstName, setActualFirstName] = useState('')
-  const [lastName, setActualLastName] = useState('')
+  const firstName = useSelector((state) => state.firstName)
+  const lastName = useSelector((state) => state.lastName)
+  const [isEditing, setEditing] = useState(false)
 
-  if (userToken) {
-    console.log("bon déjà la bonne nouvelle c'est qu'on a un token t'as capté : ")
-    postProfile(request)
-    .then((res) => {
-      console.log("___POSTPROFILE : ", res)
-      if(!newFirstName || !newLastName){
-        setActualFirstName(res.data.body.firstName)
-        setActualLastName(res.data.body.lastName)
-        console.log(firstName)
-        console.log(lastName)
-      }
-    })
-    .catch((err) => {
-      console.error(err)
-    })
-  }
-
-  const editProfile = (e) => {
-    e.preventDefault()
+  const submitProfile = (e) => {
     const user = {
       firstName: newFirstName,
       lastName: newLastName
     }
-    console.log("user : ", user)
+    e.preventDefault()
     putProfile(user, request)
     .then((response) => {
-      console.log(response)
+      if(response.status === 200){
+        dispatch(editProfile(user))
+      }
+      setEditing(false)
     })
   }
 
@@ -52,17 +41,24 @@ function UserPage() {
       {!userToken && <Navigate to="/" />}
       <main className="main bg-dark">
         <div className="header">
-          <form id="formUserPage" onSubmit={(e) => editProfile(e)}>
-            <div className="input-wrapper">
-					    <label htmlFor="firstname">Firstname</label>
-              <input type="text" id="firstname" placeholder={firstName} onChange={(e) => setFirstName(e.target.value)}/>
-				    </div>
-            <div className="input-wrapper">
-					    <label htmlFor="lastname">Lastname</label>
-              <input type="text" id="lastname" placeholder={lastName} onChange={(e) => setLastName(e.target.value)}/>
-				    </div>
-            <button className="edit-button" type="submit">SAVE</button>
-          </form>
+          <h1>Welcome back<br />{`${firstName} ${lastName}`}</h1>
+          <button className="edit-button" onClick={() => {setEditing(true)}}>Edit Name</button>
+          { isEditing &&
+            <form id="formUserPage" onSubmit={(e) => submitProfile(e)}>
+              <div className="input-wrapper">
+                <label htmlFor="firstname">Firstname</label>
+                <input type="text" id="firstname" placeholder={firstName} onChange={(e) => setFirstName(e.target.value)}/>
+              </div>
+              <div className="input-wrapper">
+                <label htmlFor="lastname">Lastname</label>
+                <input type="text" id="lastname" placeholder={lastName} onChange={(e) => setLastName(e.target.value)}/>
+              </div>
+              <div className="input-wrapper flex-row">
+                <button className="edit-button" type="submit">SAVE</button>
+                <button className="edit-button" onClick={() => {setEditing(false)}}>CANCEL</button>
+              </div>
+            </form>
+          }
         </div>
         <AccountList />
       </main>

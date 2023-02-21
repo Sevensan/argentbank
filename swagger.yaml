@@ -15,26 +15,27 @@ paths:
         - user
       summary: info of user
       description: get the user informations by his id.
-      operationId: getUser
       parameters:
         - in: path
-          name: accountID
-          description: The user id to get data
-          required: true
           schema:
             type: number
+          name: accountID
+          description: The user account id
+          required: true
       responses:
         '200':
           description: User's transactions retrieved successully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transaction_Response'          
+                $ref: '#/components/schemas/Transaction_Response'
             application/xml:
               schema:
                 $ref: '#/components/schemas/Transaction_Response'
         '400':
           description: Invalid Fields
+        '401':
+          description: Unauthorized
         '500':
           description: Internal Server Error
         default:
@@ -50,8 +51,40 @@ paths:
     post:
       tags:
         - user
-      summary: Creates list of users with given input array
-      description: Creates list of users with given input array
+      summary: transaction api
+      description: API for fetching details from a specific transaction
+      parameters:
+        - in: path
+          name: accountID
+          description: Account ID to return transactions
+          required: true
+          schema:
+            type: number
+        - in: path
+          name : transactionID
+          description: Transaction ID to return transaction details
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction_Details_Response'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transaction_Details_Response'
+        '401':
+          description: Unauthorized
+        default:
+          description: successful operation
+    patch:
+      tags:
+        - user
+      summary: transaction api
+      description: API for modifying transaction informations
       parameters:
         - in: path
           name: accountID
@@ -71,61 +104,26 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Transaction_Details_Response'
+                $ref: '#/components/schemas/Transaction_Informations'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Transaction_Details_Response'          
+                $ref: '#/components/schemas/Transaction_Details_Response'
             application/xml:
               schema:
                 $ref: '#/components/schemas/Transaction_Details_Response'
+        '401':
+          description: Unauthorized
         default:
           description: successful operation
-    put: 
+    delete:
       tags:
         - user
-      summary: Creates list of users with given input array
-      description: Creates list of users with given input array
-      parameters:
-        - in: path
-          name: accountID
-          description: Account ID to return transactions
-          required: true
-          schema:
-            type: number
-        - in: path
-          name : transactionID
-          description: Transaction ID to return transaction details
-          required: true
-          schema:
-            type: number
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Transaction_Details_Response'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Transaction_Details_Response'          
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Transaction_Details_Response'
-        default:
-          description: successful operation
-    delete: 
-      tags:
-        - user
-      summary: Creates list of users with given input array
-      description: Creates list of users with given input array
+      summary: transaction api
+      description: API for deleting transaction informations
       parameters:
         - in: path
           name: accountID
@@ -141,31 +139,42 @@ paths:
             type: number
       responses:
         '200':
-          description: Successful operation
+          description: Transaction informations deleted successully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Delete_Response'          
+                $ref: '#/components/schemas/Delete_Response'
             application/xml:
               schema:
                 $ref: '#/components/schemas/Delete_Response'
         default:
           description: successful operation
+        '400':
+          description: Invalid Fields
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
-    Transaction_Response: 
+    Transaction_Response:
       type: object
-      properties: 
-        status: 
+      properties:
+        status:
           type: integer
         message:
           type: string
         body:
           type: array
-          items: 
+          items:
             type: object
             properties:
-              id: 
+              id:
                 type: number
                 description: transaction ID
               date:
@@ -180,77 +189,46 @@ components:
               balance:
                 type: number
                 description: account balance
-    Transaction_Details_Response: 
+    Transaction_Details_Response:
       type: object
-      properties: 
-        status: 
+      properties:
+        status:
           type: integer
         message:
           type: string
         body:
           type: object
-          items: 
-            type: object
-            properties:
-              id: 
-                type: number
-                description: transaction ID
-              transactionType:
+          properties:
+            id:
+              type: number
+              description: transaction ID
+            transactionType:
+              type: string
+              description: transaction type
+            category:
+              type: string
+              description: transaction category
+            notes:
+              type: string
+              description: transaction notes
+    Transaction_Informations:
+        type: object
+        properties:
+            transactiontype:
                 type: string
                 description: transaction type
-              category:
+            category:
                 type: string
                 description: transaction category
-              notes:
+            notes:
                 type: string
                 description: transaction notes
-    Delete_Response: 
-      type: object
-      properties: 
-        status: 
-          type: integer
-        message:
-          type: string
-    ApiResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        type:
-          type: string
-        message:
-          type: string
-      xml:
-        name: '##default'
-  requestBodies:
-    Pet:
-      description: Pet object that needs to be added to the store
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Pet'
-        application/xml:
-          schema:
-            $ref: '#/components/schemas/Pet'
-    UserArray:
-      description: List of user object
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/User'
-  securitySchemes:
-    petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: https://petstore3.swagger.io/oauth/authorize
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
-    api_key:
-      type: apiKey
-      name: api_key
-      in: header
+    Delete_Response:
+        type: object
+        properties:
+            status:
+                type: integer
+            message:
+                type: string
+security:
+  - bearerAuth: []
